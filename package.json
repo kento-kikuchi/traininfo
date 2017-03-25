@@ -5,6 +5,8 @@
   "author": "Kento Kikuchi <kento-kikuchi@hands-lab.com>",
   "description": "personal train info",
   "dependencies": {
+    "cheerio-httpcli": "^0.6.11",
+    "cron": "^1.2.1",
     "hubot": "^2.19.0",
     "hubot-diagnostics": "0.0.1",
     "hubot-google-images": "^0.2.6",
