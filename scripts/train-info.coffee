@@ -2,9 +2,9 @@
 #   電車遅延情報をSlackに投稿する
 #
 # Commands:
-#   hubot train < kaoru | yuri | all > - Return train info
+#   hubot train < check > - Return train info
 #
-# Author:
+# Original Author:
 #   Kaoru Hotate
 
 cheerio = require 'cheerio-httpcli'
@@ -43,56 +43,58 @@ module.exports = (robot) ->
     jr_ss = 'http://transit.yahoo.co.jp/traininfo/detail/25/0/'
     # 京王線
     keio = 'http://transit.yahoo.co.jp/traininfo/detail/102/0/'
+    # 丸ノ内線
+    metro_maru='http://transit.yahoo.co.jp/traininfo/detail/133/0/'
+    # 副都心線
+    metro_fuku='http://transit.yahoo.co.jp/traininfo/detail/540/0/'
 
-    if target == "kaoru"
-      searchTrain(metro_yu, msg)
-      searchTrain(jr_kt, msg)
+    if target == "check"
       searchTrain(keio, msg)
-    else if target == "yuri"
-      searchTrain(jr_ym, msg)
-      searchTrain(jr_sk, msg)
-      searchTrain(jr_ss, msg)
+      searchTrain(metro_maru, msg)
+      searchTrain(metro_fuku, msg)
     else if target == "all"
       searchAllTrain(msg)
     else
-      msg.send "#{target}は検索できないよ。Σ (￣ロ￣|||)"
+      msg.send "#{target}は検索できません。"
 
   searchTrain = (url, msg) ->
     cheerio.fetch url, (err, $, res) ->
       title = "#{$('h1').text()}"
       if $('.icnNormalLarge').length
-        msg.send "#{title}は遅れてないよ。━ ━ (´･ω ･`)━ ━ "
+        msg.send "#{title}は遅延情報がありません。"
       else
         info = $('.trouble p').text()
-        msg.send "#{title}は遅れているみたい。♪ へ(´д ｀へ)♪ (ノ´ д ｀)ノ♪ \n#{info}"
+        msg.send "#{title}は遅延情報があります。\n#{info}"
 
-  new cronJob('0 0 7 * * 1-5', () ->
-    # 有楽町線
-    metro_yu = 'http://transit.yahoo.co.jp/traininfo/detail/137/0/'
-    # 京浜東北線
-    jr_kt = 'http://transit.yahoo.co.jp/traininfo/detail/22/0/'
-    searchTrainCron(metro_yu)
-    searchTrainCron(jr_kt)
+  new cronJob('0 0 8,18 * * 1-5', () ->
+    # 京王線
+    keio = 'http://transit.yahoo.co.jp/traininfo/detail/102/0/'
+    # 丸ノ内線
+    metro_maru='http://transit.yahoo.co.jp/traininfo/detail/133/0/'
+    # 副都心線
+    metro_fuku='http://transit.yahoo.co.jp/traininfo/detail/540/0/'
+    searchTrainCron(keio)
+    searchTrainCron(metro_maru)
+    searchTrainCron(metro_fuku)
   ).start()
 
-  new cronJob('0 0 8 * * 1,3,5', () ->
-    # 山手線
-    jr_ym = 'http://transit.yahoo.co.jp/traininfo/detail/21/0/'
-    # 埼京線
-    jr_sk = 'http://transit.yahoo.co.jp/traininfo/detail/50/0/'
-    # 湘南新宿ライン
-    jr_ss = 'http://transit.yahoo.co.jp/traininfo/detail/25/0/'
-
-    searchTrainCron(jr_ym)
-    searchTrainCron(jr_sk)
-    searchTrainCron(jr_ss)
-  ).start()
+#  new cronJob('0 0 8 * * 1,3,5', () ->
+#    # 京王線
+#    keio = 'http://transit.yahoo.co.jp/traininfo/detail/102/0/'
+#    # 丸ノ内線
+#    metro_maru='http://transit.yahoo.co.jp/traininfo/detail/133/0/'
+#    # 副都心線
+#    metro_fuku='http://transit.yahoo.co.jp/traininfo/detail/540/0/'
+#    searchTrainCron(keio)
+#    searchTrainCron(metro_maru)
+#    searchTrainCron(metro_fuku)
+#  ).start()
 
   searchTrainCron = (url) ->
     cheerio.fetch url, (err, $, res) ->
       title = "#{$('h1').text()}"
       if $('.icnNormalLarge').length
-        robot.send {room: "#mybot"}, "#{title}は遅れてないよ。━ ━ (´･ω ･`)━ ━ "
+        robot.send {room: "#mybot"}, "#{title}は遅延情報がありません。"
       else
         info = $('.trouble p').text()
-        robot.send {room: "#mybot"}, "#{title}は遅れているみたい。♪ へ(´д ｀へ)♪ (ノ´ д ｀)ノ♪ \n#{info}"
+        robot.send {room: "#mybot"}, "#{title}は遅延情報があります。\n#{info}"
